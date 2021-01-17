@@ -81,6 +81,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("학번: ", user.StudentCode)
 	}
 
 	if lectureErr != nil {
@@ -116,6 +117,11 @@ func main() {
 
 			_ = AddLecture(db, lectureName, lectureCode)
 		}
+		fmt.Println("------------------------수강과목------------------------")
+		for _, name := range lectureNameList {
+			fmt.Println(name)
+		}
+		fmt.Println("--------------------------------------------------------")
 	}
 
 	fmt.Println("출결 불러오는 중 ...")
