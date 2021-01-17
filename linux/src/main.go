@@ -12,6 +12,14 @@ import (
 )
 
 func main() {
+	fmt.Println(`#     #    #    #     # #     #    #    #     #  #####
+#     #   # #   ##    #  #   #    # #   ##    # #     #
+#     #  #   #  # #   #   # #    #   #  # #   # #
+####### #     # #  #  #    #    #     # #  #  # #  ####
+#     # ####### #   # #    #    ####### #   # # #     #
+#     # #     # #    ##    #    #     # #    ## #     #
+#     # #     # #     #    #    #     # #     #  #####`)
+	fmt.Println()
 	db, _ := InitDB("database.db")
 	user, userErr := ReturnUser(db, "1")
 	if userErr != nil {
@@ -56,6 +64,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("로그인 성공!")
+
 	if userErr != nil {
 		var stdCode string
 		err = chromedp.Run(ctx,
@@ -69,25 +79,25 @@ func main() {
 		}
 	}
 
-	err = chromedp.Run(ctx,
-		GoLecturePage(),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	time.Sleep(1 * time.Second)
-
-	err = chromedp.Run(ctx,
-		chromedp.ScrollIntoView("/html/body/div[1]/div[2]/bb-base-layout/div/main/div/div/div[1]/div[1]/div/div/div[3]/div/div[2]/div/div[5]/bb-base-course-card/div[1]/div[2]/a/h4", chromedp.BySearch),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	time.Sleep(1 * time.Second)
-
 	if lectureErr != nil {
 		var lectureName, lectureCode string
+
+		err = chromedp.Run(ctx,
+			GoLecturePage(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(1 * time.Second)
+
+		err = chromedp.Run(ctx,
+			chromedp.ScrollIntoView("/html/body/div[1]/div[2]/bb-base-layout/div/main/div/div/div[1]/div[1]/div/div/div[3]/div/div[2]/div/div[5]/bb-base-course-card/div[1]/div[2]/a/h4", chromedp.BySearch),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		time.Sleep(1 * time.Second)
 
 		ctx2, _ := context.WithTimeout(ctx, 1*time.Second)
 		for i := 2; ; i++ {
@@ -100,9 +110,11 @@ func main() {
 			lectureNameList = append(lectureNameList, lectureName)
 			lectureCodeList = append(lectureCodeList, lectureCode)
 
-			AddLecture(db, lectureName, lectureCode)
+			_ = AddLecture(db, lectureName, lectureCode)
 		}
 	}
+
+	fmt.Println("출결 불러오는 중 ...")
 
 	RemoveFile("xls")
 	RemoveFile("xlsx")
@@ -118,6 +130,9 @@ func main() {
 
 	RemoveFile("xls")
 	RemoveFile("xlsx")
+
+	fmt.Println("완료!")
+	time.Sleep(1 * time.Second)
 }
 
 func Login(user *User) chromedp.Tasks {
