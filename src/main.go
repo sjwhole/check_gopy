@@ -23,6 +23,15 @@ func main() {
 		user.SetInfo(uid, upw)
 	}
 
+	lectureNameList, lectureCodeList, lectureErr := ReturnLecture(db)
+	if userErr == nil {
+		fmt.Println("만약 정보가 다르다면 database.db를 삭제한 뒤 실행해주세요.")
+		fmt.Println("학번: ", user.StudentCode)
+	}
+	if lectureErr == nil {
+		fmt.Println("수강과목:", lectureNameList)
+	}
+
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.DisableGPU,
 		// Set the headless flag to false to display the browser window
@@ -78,19 +87,22 @@ func main() {
 
 	time.Sleep(1 * time.Second)
 
-	var lectureName, lectureCode string
-	var lectureNameList, lectureCodeList []string
+	if lectureErr != nil {
+		var lectureName, lectureCode string
 
-	ctx2, _ := context.WithTimeout(ctx, 1*time.Second)
-	for i := 2; i < 7; i++ {
-		err = chromedp.Run(ctx2,
-			GetLectureInfo(i, &lectureName, &lectureCode),
-		)
-		if err != nil {
-			break
+		ctx2, _ := context.WithTimeout(ctx, 1*time.Second)
+		for i := 2; ; i++ {
+			err = chromedp.Run(ctx2,
+				GetLectureInfo(i, &lectureName, &lectureCode),
+			)
+			if err != nil {
+				break
+			}
+			lectureNameList = append(lectureNameList, lectureName)
+			lectureCodeList = append(lectureCodeList, lectureCode)
+
+			AddLecture(db, lectureName, lectureCode)
 		}
-		lectureNameList = append(lectureNameList, lectureName)
-		lectureCodeList = append(lectureCodeList, lectureCode)
 	}
 
 	RemoveFile("xls")
@@ -102,6 +114,8 @@ func main() {
 		)
 	}
 	time.Sleep(1 * time.Second)
+
+	RunPy()
 
 	RemoveFile("xls")
 	RemoveFile("xlsx")

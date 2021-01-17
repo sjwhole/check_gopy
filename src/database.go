@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"strconv"
 )
 
 type User struct {
@@ -75,7 +76,21 @@ func ReturnUser(db *sql.DB, userId string) (User, error) {
 	return user, nil
 }
 
-//func ReturnLecture(studentDB *sql.DB) ([]string, []string) {
-//	var lectureNameList, lectureCodeList []string
-//	rows := studentDB.QueryRow("select * from lecture")
-//}
+func ReturnLecture(studentDB *sql.DB) ([]string, []string, error) {
+	var lectureNameList, lectureCodeList []string
+	var lectureName, lectureCode string
+	for i := 1; ; i++ {
+		rows := studentDB.QueryRow("select name, code from lecture WHERE id=$1", strconv.Itoa(i))
+		err := rows.Scan(&lectureName, &lectureCode)
+		if err != nil {
+			if i == 1 {
+				return lectureNameList, lectureCodeList, err
+			}
+			break
+		}
+		lectureNameList = append(lectureNameList, lectureName)
+		lectureCodeList = append(lectureCodeList, lectureCode)
+	}
+
+	return lectureNameList, lectureCodeList, nil
+}
