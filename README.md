@@ -1,1 +1,1 @@
-# checko_gopy
+# check_gopy
