@@ -36,7 +36,11 @@ func main() {
 		fmt.Println("학번: ", user.StudentCode)
 	}
 	if lectureErr == nil {
-		fmt.Println("수강과목:", lectureNameList)
+		fmt.Println("------------------------수강과목------------------------")
+		for _, name := range lectureNameList {
+			fmt.Println(name)
+		}
+		fmt.Println("--------------------------------------------------------")
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
